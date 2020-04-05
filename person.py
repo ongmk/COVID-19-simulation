@@ -3,11 +3,12 @@ import numpy as np
 CONFIG = {
     "HEIGHT" : 10,
     "DT" : 1,
-    "RADIUS" : 3.,
+    "RADIUS" : 1.,
     "INFECTED_P" : 0.05,
     "SOCIAL_DISTANCING_FACTOR" : 2,
-    "POPULATION" : 100,
-    "RECOVERED_P" : 0.01,
+    "POPULATION" : 500,
+    "RECOVERED_P" : 0.05,
+    "DEATH_P" : 0.1,
     "DEAD_TIME" : 50
 }
 
@@ -32,6 +33,7 @@ class Person:
         self.maxVel = 1
         self.infected_time = 0
         self.recovered_p = CONFIG["RECOVERED_P"]
+        self.death_p = CONFIG["DEATH_P"]
         self.dead_time = CONFIG["DEAD_TIME"]
 
         # position parameters
@@ -75,7 +77,8 @@ class Person:
                     self.set_status("I")
         elif self.status == "Infected":
             if self.infected_time > self.dead_time:
-                self.set_status("D")
+                if np.random.rand() < self.death_p:
+                    self.set_status("D")
             else:
                 if np.random.rand() < self.recovered_p:
                     self.set_status("R")
@@ -104,7 +107,8 @@ class Community:
         self.initial_population = population
         self.population = population
         self.people = [Person() for i in range(population)]
-        [person.set_status("I") for person in self.people[:int(0.1*population)]]
+        self.time = 0
+        [person.set_status("I") for person in self.people[:max(int(0.01*population),1)]]
 
     def get_positions(self):
         return np.array([person.pos for person in self.people])
@@ -129,6 +133,7 @@ class Community:
             self.population -= 1
 
     def update(self):
+        self.time += CONFIG["DT"]
         poss = []
         colors = []
         self.remove_dead()
