@@ -12,8 +12,8 @@ scat = ax1.scatter([p.pos[0] for p in community.people],
                    [p.pos[1] for p in community.people],
                    c=[p.color for p in community.people],
                    s=20)
-ax1.set_xlim(-CONFIG["HEIGHT"]-100,CONFIG["HEIGHT"]+100)
-ax1.set_ylim(-CONFIG["HEIGHT"]-100,CONFIG["HEIGHT"]+100)
+ax1.set_xlim(-CONFIG["HEIGHT"]*1.1,CONFIG["HEIGHT"]*1.1)
+ax1.set_ylim(-CONFIG["HEIGHT"]*1.1,CONFIG["HEIGHT"]*1.1)
 
 frames = [0]
 status_count = community.status_count()
@@ -38,5 +38,5 @@ def animate(frame):
     return plots
 
 
-ani = animation.FuncAnimation(fig=fig, func=animate, frames=1000, interval=100, blit=False)
+ani = animation.FuncAnimation(fig=fig, func=animate, frames=1000, interval=1, blit=False)
 plt.show()

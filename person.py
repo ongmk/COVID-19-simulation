@@ -1,9 +1,9 @@
 import numpy as np
 
 CONFIG = {
-    "HEIGHT" : 1000,
-    "DT" : 10,
-    "RADIUS" : 20.,
+    "HEIGHT" : 100,
+    "DT" : 1,
+    "RADIUS" : 3.,
     "INFECTED_P" : 0.05,
     "SOCIAL_DISTANCING_FACTOR" : 0,
     "POPULATION" : 1000
@@ -30,7 +30,7 @@ class Person:
 
         # position parameters
         self.pos = np.array((np.random.rand(2)-0.5)*2*CONFIG["HEIGHT"])
-        self.vel = (np.random.rand(2)+0.3)*12
+        self.vel = (np.random.rand(2)+0.3)*2
         for i in range(2):
             if np.random.rand() < 0.5:
                 self.vel[i] = -self.vel[i]
