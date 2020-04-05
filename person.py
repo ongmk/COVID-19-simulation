@@ -6,7 +6,9 @@ CONFIG = {
     "RADIUS" : 3.,
     "INFECTED_P" : 0.05,
     "SOCIAL_DISTANCING_FACTOR" : 0,
-    "POPULATION" : 1000
+    "POPULATION" : 500,
+    "RECOVERED_P" : 0.01,
+    "DEAD_TIME" : 200
 }
 
 # colors
@@ -27,6 +29,9 @@ class Person:
         self.neighbours_pos=[]
         self.neighbours_status = []
         self.maxVel = 1
+        self.infected_time = 0
+        self.recovered_p = CONFIG["RECOVERED_P"]
+        self.dead_time = CONFIG["DEAD_TIME"]
 
         # position parameters
         self.pos = np.array((np.random.rand(2)-0.5)*2*CONFIG["HEIGHT"])
@@ -56,12 +61,24 @@ class Person:
                        "R":"Recovered",
                        "D":"Dead"}[status]
         self.color = COLOR_SCHEME[status]
+        if status == "I":
+            self.infected_time = 1
+        else:
+            self.infected_time = 0
 
-    def check_infection(self):
-        if len(self.neighbours_status) != 0:
-            infected_neighbour = np.sum(self.neighbours_status=="Infected")
-            if np.random.rand() < infected_neighbour * self.infected_p:
-                self.set_status("I")
+    def check_status_change(self):
+        if self.status == "Susceptible":
+            if len(self.neighbours_status) != 0:
+                infected_neighbour = np.sum(self.neighbours_status=="Infected")
+                if np.random.rand() < infected_neighbour * self.infected_p:
+                    self.set_status("I")
+        elif self.status == "Infected":
+            if self.infected_time > self.dead_time:
+                self.set_status("D")
+            else:
+                if np.random.rand() < self.recovered_p:
+                    self.set_status("R")
+                self.infected_time += 1
 
     def update(self):
         dt = CONFIG["DT"]
@@ -70,7 +87,7 @@ class Person:
         if np.linalg.norm(self.vel) > self.maxVel:
             self.vel = self.maxVel * self.vel / np.linalg.norm(self.vel)
         self.pos += self.vel*dt
-        self.check_infection()
+        self.check_status_change()
         if self.pos[0] > CONFIG["HEIGHT"] or self.pos[0] < -CONFIG["HEIGHT"]:
             self.vel[0] = -self.vel[0]
         if self.pos[1] > CONFIG["HEIGHT"] or self.pos[1] < -CONFIG["HEIGHT"]:
