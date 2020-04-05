@@ -30,6 +30,9 @@ class Person:
 
         # plotting parameters
         self.color = green
+        if np.random.rand() < 0.05:
+            self.color = red
+            self.status = "Infected"
 
     def social_dist(self):
         repulsion_force = np.zeros(2)
@@ -70,8 +73,6 @@ class Community:
     def __init__(self,n):
         self.population = n
         self.people = [Person() for i in range(n)]
-        self.people[0].status = "Infected"
-        self.people[0].color = red
 
     def get_positions(self):
         return np.array([person.pos for person in self.people])
