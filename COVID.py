@@ -19,8 +19,11 @@ frames = [0]
 status_count = community.status_count()
 s_data = [status_count[0]]
 i_data = [status_count[1]]
-graph = ax2.stackplot(frames,s_data,i_data,labels=["S","I"],
-                      colors = [COLOR_SCHEME["S"],COLOR_SCHEME["I"]])
+r_data = [status_count[2]]
+d_data = [status_count[3]]
+graph = ax2.stackplot(frames, s_data, i_data, r_data, d_data,labels=["S","I","R","D"],
+                      colors = [COLOR_SCHEME["S"], COLOR_SCHEME["I"],
+                                COLOR_SCHEME["R"], COLOR_SCHEME["D"]])
 ax2.set_ylim(0, CONFIG["POPULATION"])
 plots = [scat,graph]
 
@@ -31,9 +34,13 @@ def animate(frame):
     frames.append(frame)
     s_data.append(status_count[0])
     i_data.append(status_count[1])
-    graph = ax2.stackplot(frames,s_data,i_data,labels=["S","I"],
-                          colors = [COLOR_SCHEME["S"],COLOR_SCHEME["I"]])
-    ax2.set_xlim(0,frame)
+    r_data.append(status_count[2])
+    d_data.append(status_count[2])
+    graph = ax2.stackplot(frames, s_data, i_data, r_data, d_data, labels=["S","I","R","D"],
+                          colors = [COLOR_SCHEME["S"],COLOR_SCHEME["I"],
+                                    COLOR_SCHEME["R"],COLOR_SCHEME["D"]])
+    if frame != 0:
+        ax2.set_xlim(0,frame)
 
     return plots
 

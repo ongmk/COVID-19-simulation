@@ -1,12 +1,12 @@
 import numpy as np
 
 CONFIG = {
-    "HEIGHT" : 100,
+    "HEIGHT" : 10,
     "DT" : 1,
     "RADIUS" : 3.,
     "INFECTED_P" : 0.05,
-    "SOCIAL_DISTANCING_FACTOR" : 0,
-    "POPULATION" : 1000
+    "SOCIAL_DISTANCING_FACTOR" : 2,
+    "POPULATION" : 100
 }
 
 # colors
@@ -71,17 +71,23 @@ class Person:
             self.vel = self.maxVel * self.vel / np.linalg.norm(self.vel)
         self.pos += self.vel*dt
         self.check_infection()
-        if self.pos[0] > CONFIG["HEIGHT"] or self.pos[0] < -CONFIG["HEIGHT"]:
-            self.vel[0] = -self.vel[0]
-        if self.pos[1] > CONFIG["HEIGHT"] or self.pos[1] < -CONFIG["HEIGHT"]:
-            self.vel[1] = -self.vel[1]
+        if self.pos[0] > CONFIG["HEIGHT"]:
+            self.vel[0] = -np.abs(self.vel[0])
+        elif self.pos[0] < -CONFIG["HEIGHT"]:
+            self.vel[0] = np.abs(self.vel[0])
+        if self.pos[1] > CONFIG["HEIGHT"]:
+            self.vel[1] = -np.abs(self.vel[1])
+        elif self.pos[1] < -CONFIG["HEIGHT"]:
+            self.vel[1] = np.abs(self.vel[1])
 
 
 class Community:
     def __init__(self,population= CONFIG["POPULATION"]):
         self.population = population
         self.people = [Person() for i in range(population)]
-        [person.set_status("I") for person in self.people[:10]]
+        [person.set_status("I") for person in self.people[:int(0.1*population)]]
+        [person.set_status("R") for person in self.people[int(0.1*population+1):int(0.2*population)]]
+        [person.set_status("D") for person in self.people[int(0.2*population+1):int(0.4*population)]]
 
     def get_positions(self):
         return np.array([person.pos for person in self.people])
