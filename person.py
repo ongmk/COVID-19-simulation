@@ -101,6 +101,7 @@ class Person:
 
 class Community:
     def __init__(self,population= CONFIG["POPULATION"]):
+        self.initial_population = population
         self.population = population
         self.people = [Person() for i in range(population)]
         [person.set_status("I") for person in self.people[:int(0.1*population)]]
@@ -118,7 +119,7 @@ class Community:
         s_count = np.sum(self.get_status() == "Susceptible")
         i_count = np.sum(self.get_status() == "Infected")
         r_count = np.sum(self.get_status() == "Recovered")
-        d_count = np.sum(self.get_status() == "Dead")
+        d_count = self.initial_population-s_count-i_count-r_count
         return [s_count, i_count, r_count, d_count]
 
     def remove_dead(self):
