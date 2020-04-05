@@ -17,7 +17,7 @@ COLOR_SCHEME = {
     "S" : "#34BF49",
     "I" : "#FF4C4C",
     "R" : "#0099E5",
-    "D" : "#7B8D8E"
+    "D" : "#333333"
 }
 
 class Person:
@@ -119,7 +119,7 @@ class Community:
         i_count = np.sum(self.get_status() == "Infected")
         r_count = np.sum(self.get_status() == "Recovered")
         d_count = np.sum(self.get_status() == "Dead")
-        return [s_count, i_count, r_count, s_count]
+        return [s_count, i_count, r_count, d_count]
 
     def update(self):
         poss = []

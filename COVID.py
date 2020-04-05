@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 from matplotlib import animation
 
 with plt.style.context("dark_background"):
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 10),
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(5, 8),
                                    gridspec_kw={'height_ratios': [3, 1]})
 ax1.set_aspect('equal')
 
@@ -21,29 +21,37 @@ s_data = [status_count[0]]
 i_data = [status_count[1]]
 r_data = [status_count[2]]
 d_data = [status_count[3]]
-graph = ax2.stackplot(frames, s_data, i_data, r_data, d_data,labels=["S","I","R","D"],
-                      colors = [COLOR_SCHEME["S"], COLOR_SCHEME["I"],
+graph = ax2.stackplot(frames, i_data, s_data, r_data, d_data,labels=["I","S","R","D"],
+                      colors = [COLOR_SCHEME["I"], COLOR_SCHEME["S"],
                                 COLOR_SCHEME["R"], COLOR_SCHEME["D"]])
 ax2.set_ylim(0, CONFIG["POPULATION"])
+ax2.legend()
 plots = [scat,graph]
 
+pause = False
+def onClick(event):
+    global pause
+    pause ^= True
+
 def animate(frame):
-    poss, colors, status, status_count = community.update()
-    scat.set_offsets(poss)
-    scat.set_color(colors)
-    frames.append(frame)
-    s_data.append(status_count[0])
-    i_data.append(status_count[1])
-    r_data.append(status_count[2])
-    d_data.append(status_count[2])
-    graph = ax2.stackplot(frames, s_data, i_data, r_data, d_data, labels=["S","I","R","D"],
-                          colors = [COLOR_SCHEME["S"],COLOR_SCHEME["I"],
-                                    COLOR_SCHEME["R"],COLOR_SCHEME["D"]])
-    if frame != 0:
-        ax2.set_xlim(0,frame)
+    if not pause:
+        poss, colors, status, status_count = community.update()
+        scat.set_offsets(poss)
+        scat.set_color(colors)
+        frames.append(frame)
+        s_data.append(status_count[0])
+        i_data.append(status_count[1])
+        r_data.append(status_count[2])
+        d_data.append(status_count[3])
+        graph = ax2.stackplot(frames, i_data, s_data, r_data, d_data, labels=["I","S","R","D"],
+                              colors = [COLOR_SCHEME["I"],COLOR_SCHEME["S"],
+                                        COLOR_SCHEME["R"],COLOR_SCHEME["D"]])
+        if frame != 0:
+            ax2.set_xlim(0,frame)
 
-    return plots
+        return plots
 
 
+fig.canvas.mpl_connect('button_press_event', onClick)
 ani = animation.FuncAnimation(fig=fig, func=animate, frames=1000, interval=1, blit=False)
 plt.show()
