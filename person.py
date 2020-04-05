@@ -67,7 +67,7 @@ class Person:
         else:
             self.infected_time = 0
 
-    def check_status_change(self):
+    def check_status_change(self, dt):
         if self.status == "Susceptible":
             if len(self.neighbours_status) != 0:
                 infected_neighbour = np.sum(self.neighbours_status=="Infected")
@@ -79,7 +79,7 @@ class Person:
             else:
                 if np.random.rand() < self.recovered_p:
                     self.set_status("R")
-                self.infected_time += 1
+                self.infected_time += dt
 
     def update(self):
         dt = CONFIG["DT"]
@@ -88,7 +88,7 @@ class Person:
         if np.linalg.norm(self.vel) > self.maxVel:
             self.vel = self.maxVel * self.vel / np.linalg.norm(self.vel)
         self.pos += self.vel*dt
-        self.check_status_change()
+        self.check_status_change(dt)
         if self.pos[0] > CONFIG["HEIGHT"]:
             self.vel[0] = -np.abs(self.vel[0])
         elif self.pos[0] < -CONFIG["HEIGHT"]:
