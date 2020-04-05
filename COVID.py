@@ -1,11 +1,16 @@
 from person import Community, COLOR_SCHEME, CONFIG
 from matplotlib import pyplot as plt
-from matplotlib import animation
+from matplotlib import animation, gridspec
 
 with plt.style.context("dark_background"):
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(5, 8),
-                                   gridspec_kw={'height_ratios': [3, 1]})
-ax1.set_aspect('equal')
+    fig = plt.figure(figsize=(8,5))
+    plt.suptitle("COVID-19 Simulation")
+    gs = gridspec.GridSpec(2, 2, width_ratios=[3, 4],
+                           wspace=0.3, hspace=0.3)
+    ax1 = plt.subplot(gs[:,0])
+    ax1.set_aspect('equal')
+    ax2 = plt.subplot(gs[1])
+    ax3 = plt.subplot(gs[3])
 
 community = Community()
 scat = ax1.scatter([p.pos[0] for p in community.people],
@@ -25,7 +30,9 @@ graph = ax2.stackplot(frames, i_data, s_data, r_data, d_data,labels=["I","S","R"
                       colors = [COLOR_SCHEME["I"], COLOR_SCHEME["S"],
                                 COLOR_SCHEME["R"], COLOR_SCHEME["D"]])
 ax2.set_ylim(0, CONFIG["POPULATION"])
-ax2.legend()
+ax2.legend(prop={'size': 6})
+ax2.set_ylabel("Population")
+ax2.set_xlabel("Time (frames)")
 plots = [scat,graph]
 
 pause = False
