@@ -6,6 +6,10 @@ CONFIG = {
     "RADIUS" : 3.,
     "INFECTED_P" : 0.05,
     "SOCIAL_DISTANCING_FACTOR" : 2,
+    "POPULATION" : 100,
+    "RECOVERED_P" : 0.01,
+    "DEAD_TIME" : 50
+}
 
 
 # colors
@@ -100,8 +104,6 @@ class Community:
         self.population = population
         self.people = [Person() for i in range(population)]
         [person.set_status("I") for person in self.people[:int(0.1*population)]]
-        [person.set_status("R") for person in self.people[int(0.1*population+1):int(0.2*population)]]
-        [person.set_status("D") for person in self.people[int(0.2*population+1):int(0.4*population)]]
 
     def get_positions(self):
         return np.array([person.pos for person in self.people])
