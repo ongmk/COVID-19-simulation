@@ -121,12 +121,19 @@ class Community:
         d_count = np.sum(self.get_status() == "Dead")
         return [s_count, i_count, r_count, d_count]
 
+    def remove_dead(self):
+        dead_index = list(np.where(self.get_status()=="Dead")[0])
+        for index in sorted(dead_index, reverse=True):
+            del self.people[index]
+            self.population -= 1
+
     def update(self):
         poss = []
         colors = []
+        self.remove_dead()
+        status = self.get_status()
         positions = self.get_positions()
         people = self.get_people()
-        status = self.get_status()
         index = np.arange(self.population)
         for i, pos, person in zip(index, positions, people):
             distances = np.linalg.norm(positions - person.pos, axis=1)
