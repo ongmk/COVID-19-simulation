@@ -1,7 +1,9 @@
 from person import Community, COLOR_SCHEME, CONFIG
 from matplotlib import pyplot as plt
+from matplotlib import colors as Colors
 from matplotlib import animation, gridspec
 from matplotlib.patches import Patch
+import numpy as np
 
 font = {'fontfamily':'serif','weight':'bold'}
 
@@ -49,7 +51,9 @@ with plt.style.context("dark_background"):
 # Setup Community
 community = Community()
 scat = ax1.scatter([],[],s=10)
-
+ripple_S2I = ax1.scatter([],[], lw = 1, facecolors='none')
+ripple_I2R = ax1.scatter([],[], lw = 1, facecolors='none')
+ripple_I2D = ax1.scatter([],[], lw = 1, facecolors='none')
 # Setup Graph
 times = [0]
 status_count = community.status_count()
@@ -80,6 +84,9 @@ def init():
     ax1.set_xlim(-CONFIG["HEIGHT"] * 1.1, CONFIG["HEIGHT"] * 1.1)
     ax1.set_ylim(-CONFIG["HEIGHT"] * 1.1, CONFIG["HEIGHT"] * 1.1)
     scat.set_offsets([])
+    ripple_S2I.set_offsets([])
+    ripple_I2R.set_offsets([])
+    ripple_I2D.set_offsets([])
 
     # init graph
     ax2.set_ylim(0, CONFIG["POPULATION"])
@@ -101,7 +108,7 @@ def init():
     r_counter.set_text("")
     d_counter.set_text("")
 
-    stack = stack+[scat,s_counter,i_counter,r_counter,d_counter]+daily.patches
+    stack = stack+[scat,ripple_S2I,ripple_I2R,ripple_I2D,s_counter,i_counter,r_counter,d_counter]+daily.patches
     return stack
 
 pause = False
@@ -112,9 +119,40 @@ def onClick(event):
 def animate(frame):
     if not pause:
         # Update community
-        poss, colors, status, status_count = community.update()
+        poss, colors, status, status_count, ripples_data = community.update()
         scat.set_offsets(poss)
         scat.set_color(colors)
+
+        #update ripple
+        #S2I
+        if ripples_data[0].shape[0] > 0:
+            ripple_S2I.set_offsets(ripples_data[0][:,:2])
+            ripple_S2I.set_sizes(ripples_data[0][:, 2]*20)
+            alphas = 1-ripples_data[0][:, 2]/CONFIG["RIPPLE_DURATION"]
+            rgb = Colors.to_rgb(COLOR_SCHEME["I"])
+            ripple_colors = np.concatenate((np.repeat(np.array([rgb]),alphas.shape[0],axis = 0),np.vstack(alphas)),axis = 1)
+            ripple_S2I.set_edgecolors(ripple_colors)
+        else:
+            ripple_S2I.set_offsets([])
+        #I2R
+        if ripples_data[1].shape[0] > 0:
+            ripple_I2R.set_offsets(ripples_data[1][:,:2])
+            ripple_I2R.set_sizes(ripples_data[1][:, 2]*20)
+            alphas = 1-ripples_data[1][:, 2]/CONFIG["RIPPLE_DURATION"]
+            rgb = Colors.to_rgb(COLOR_SCHEME["R"])
+            ripple_colors = np.concatenate((np.repeat(np.array([rgb]),alphas.shape[0],axis = 0),np.vstack(alphas)),axis = 1)
+            ripple_I2R.set_edgecolors(ripple_colors)
+        else:
+            ripple_I2R.set_offsets([])
+        if ripples_data[2].shape[0] > 0:
+            ripple_I2D.set_offsets(ripples_data[2][:,:2])
+            ripple_I2D.set_sizes(ripples_data[2][:, 2]*20)
+            alphas = 1-ripples_data[2][:, 2]/CONFIG["RIPPLE_DURATION"]
+            rgb = Colors.to_rgb(COLOR_SCHEME["D"])
+            ripple_colors = np.concatenate((np.repeat(np.array([rgb]),alphas.shape[0],axis = 0),np.vstack(alphas)),axis = 1)
+            ripple_I2D.set_edgecolors(ripple_colors)
+        else:
+            ripple_I2D.set_offsets([])
 
         # Update Stackplot
         times.append(community.time / CONFIG["TIME_IN_DAY"])
@@ -148,7 +186,7 @@ def animate(frame):
         d_counter.set_text("{}".format(status_count[3]))
 
         daily = ax3.bar(days, daily_data, color=COLOR_SCHEME["I"])
-        stack = stack+[scat,capacity_line,legend, s_counter,i_counter,r_counter,d_counter,
+        stack = stack+[scat,ripple_S2I,ripple_I2R,ripple_I2D,capacity_line,legend, s_counter,i_counter,r_counter,d_counter,
                        ax2.xaxis,ax3.xaxis,ax3.yaxis]+daily.patches
         return stack
 

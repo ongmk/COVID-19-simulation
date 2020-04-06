@@ -12,7 +12,8 @@ CONFIG = {
     "DEATH_P" : 0.002,
     "DEAD_DAY" : 3,
     "TIME_IN_DAY" : 10,
-    "CAPACITY" : 100
+    "CAPACITY" : 100,
+    "RIPPLE_DURATION" : 10
 }
 
 
@@ -36,6 +37,7 @@ class Person:
         self.infect_neighbours_status = []
         self.maxVel = 1
         self.infected_time = 0
+        self.ripple_time = 0
         self.recovered_p = CONFIG["RECOVERED_P"]
         self.death_p = CONFIG["DEATH_P"]
         self.dead_time = CONFIG["DEAD_DAY"]*CONFIG["TIME_IN_DAY"]
@@ -68,10 +70,13 @@ class Person:
                        "R":"Recovered",
                        "D":"Dead"}[status]
         self.color = COLOR_SCHEME[status]
-        if status == "I":
-            self.infected_time = 1
-        else:
-            self.infected_time = 0
+        if status != "S":
+            self.ripple_time += 1
+            if status == "I":
+                self.infected_time = 1
+            elif status == "R" or status == "D":
+                self.infected_time = 0
+
 
     def check_status_change(self, dt):
         if self.status == "Susceptible":
@@ -124,6 +129,9 @@ class Community:
     def get_status(self):
         return np.array([person.status for person in self.people])
 
+    def get_ripple_finished(self):
+        return np.array([person.ripple_time == 0 for person in self.people])
+
     def get_people(self):
         return self.people
 
@@ -135,10 +143,23 @@ class Community:
         return [s_count, i_count, r_count, d_count]
 
     def remove_dead(self):
-        dead_index = list(np.where(self.get_status()=="Dead")[0])
+        dead_index = list(np.where(np.logical_and(self.get_status()=="Dead", self.get_ripple_finished()))[0])
         for index in sorted(dead_index, reverse=True):
             del self.people[index]
             self.population -= 1
+
+    def get_ripple(self):
+        S2I = []
+        I2R = []
+        I2D = []
+        for person in self.people:
+            if person.ripple_time > 0:
+                if person.ripple_time < CONFIG["RIPPLE_DURATION"]:
+                    {"Infected":S2I,"Recovered":I2R,"Dead":I2D}[person.status].append((person.pos[0], person.pos[1], person.ripple_time))
+                    person.ripple_time += 1
+                else:
+                    person.ripple_time = 0
+        return np.array(S2I), np.array(I2R), np.array(I2D)
 
     def update(self):
         self.time += CONFIG["DT"]
@@ -163,4 +184,5 @@ class Community:
             person.update()
             poss.append(person.pos)
             colors.append(person.color)
-        return poss, colors, status, status_count
+        ripple = self.get_ripple()
+        return poss, colors, status, status_count, ripple
