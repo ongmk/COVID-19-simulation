@@ -5,6 +5,32 @@ from matplotlib.patches import Patch
 
 font = {'fontfamily':'serif','weight':'bold'}
 
+# for animating axis or titles
+def _blit_draw(self, artists, bg_cache):
+    # Handles blitted drawing, which renders only the artists given instead
+    # of the entire figure.
+    updated_ax = []
+    for a in artists:
+        # If we haven't cached the background for this axes object, do
+        # so now. This might not always be reliable, but it's an attempt
+        # to automate the process.
+        if a.axes not in bg_cache:
+            # bg_cache[a.axes] = a.figure.canvas.copy_from_bbox(a.axes.bbox)
+            # change here
+            bg_cache[a.axes] = a.figure.canvas.copy_from_bbox(a.axes.figure.bbox)
+        a.axes.draw_artist(a)
+        updated_ax.append(a.axes)
+
+    # After rendering all the needed artists, blit each axes individually.
+    for ax in set(updated_ax):
+        # and here
+        # ax.figure.canvas.blit(ax.bbox)
+        ax.figure.canvas.blit(ax.figure.bbox)
+
+
+# MONKEY PATCH!!
+animation.Animation._blit_draw = _blit_draw
+
 with plt.style.context("dark_background"):
     fig = plt.figure(figsize=(8,5))
     plt.suptitle("COVID-19 Simulation",**font)
@@ -15,6 +41,10 @@ with plt.style.context("dark_background"):
     ax2 = plt.subplot(gs[:2,1])
     ax3 = plt.subplot(gs[2:,1],sharex = ax2)
     ax4 = plt.subplot(gs[3:, 0])
+
+    ax2.xaxis.set_animated(True)
+    ax3.xaxis.set_animated(True)
+    ax3.yaxis.set_animated(True)
 
 # Init Community
 community = Community()
@@ -85,16 +115,15 @@ def animate(frame):
         current_time = times[-1]
         if frame != 0:
             ax2.set_xlim(0, current_time)
+            ax3.set_xlim(0, current_time)
 
         # update daily plot
         if int(current_time) - current_time == 0.0:
             days.append(current_time)
             daily_data.append(d_data[-int(CONFIG["TIME_IN_DAY"] / CONFIG["DT"]) - 1] - d_data[-1])
-            daily = ax3.bar(days, daily_data, color=COLOR_SCHEME["I"])
-            stack = stack+[scat,capacity_line,legend]+daily.patches
-            return stack
 
-        stack = stack+[scat,capacity_line,legend]
+        daily = ax3.bar(days, daily_data, color=COLOR_SCHEME["I"])
+        stack = stack+[scat,capacity_line,legend]+daily.patches +[ax2.xaxis,ax3.xaxis,ax3.yaxis]
         return stack
 
 fig.canvas.mpl_connect('button_press_event', onClick)
