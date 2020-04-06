@@ -10,7 +10,7 @@ with plt.style.context("dark_background"):
     ax1 = plt.subplot(gs[:,0])
     ax1.set_aspect('equal')
     ax2 = plt.subplot(gs[1])
-    ax3 = plt.subplot(gs[3])
+    ax3 = plt.subplot(gs[3],sharex = ax2)
 
 # Init Community
 community = Community()
@@ -28,17 +28,19 @@ s_data = [status_count[0]]
 i_data = [status_count[1]]
 r_data = [status_count[2]]
 d_data = [status_count[3]]
-daily_data = [i_data[0]]
 stack = ax2.stackplot(times, i_data, s_data, r_data, d_data,labels=["I","S","R","D"],
                       colors = [COLOR_SCHEME["I"], COLOR_SCHEME["S"],
                                 COLOR_SCHEME["R"], COLOR_SCHEME["D"]])
 ax2.set_ylim(0, CONFIG["POPULATION"])
 ax2.legend(prop={'size': 6})
 ax2.set_ylabel("Population")
-ax2.set_xlabel("Time (frames)")
+ax2.set_xlabel("Day")
 
 # Init Daily plot
-daily, = ax3.plot(times,daily_data, color=COLOR_SCHEME["I"])
+days = [0]
+daily_data = [i_data[0]]
+daily = ax3.bar(days,daily_data, color=COLOR_SCHEME["I"])
+ax3.set_ylabel("Daily Confirmed Case")
 
 pause = False
 def onClick(event):
@@ -53,7 +55,7 @@ def animate(frame):
         scat.set_color(colors)
 
         # Update Stackplot
-        times.append(community.time)
+        times.append(community.time/CONFIG["TIME_IN_DAY"])
         s_data.append(status_count[0])
         i_data.append(status_count[1])
         r_data.append(status_count[2])
@@ -61,14 +63,21 @@ def animate(frame):
         stack = ax2.stackplot(times, i_data, s_data, r_data, d_data, labels=["I","S","R","D"],
                               colors = [COLOR_SCHEME["I"],COLOR_SCHEME["S"],
                                         COLOR_SCHEME["R"],COLOR_SCHEME["D"]])
+        current_time = times[-1]
         if frame != 0:
-            ax2.set_xlim(0, times[-1])
+            ax2.set_xlim(0, current_time)
+            ax3.set_xlim(0,current_time)
 
         # Update daily plot
-        daily_data.append(s_data[-2]-s_data[-1])
-        daily, = ax3.plot(times,daily_data, color=COLOR_SCHEME["I"])
+        if int(current_time)-current_time == 0.0:
+            days.append(current_time)
+            daily_data.append(s_data[-int(CONFIG["TIME_IN_DAY"]/CONFIG["DT"])-1]-s_data[-1])
+            daily = ax3.bar(days,daily_data, color=COLOR_SCHEME["I"])
+            stack = [scat] + stack + daily.patches
 
-        return scat,stack, daily
+            return stack
+        stack.append(scat)
+        return stack
 
 
 fig.canvas.mpl_connect('button_press_event', onClick)

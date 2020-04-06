@@ -1,15 +1,16 @@
 import numpy as np
 
 CONFIG = {
-    "HEIGHT" : 10,
+    "HEIGHT" : 50,
     "DT" : 1,
-    "RADIUS" : 1.,
-    "INFECTED_P" : 0.05,
+    "RADIUS" : 5.,
     "SOCIAL_DISTANCING_FACTOR" : 2,
-    "POPULATION" : 500,
-    "RECOVERED_P" : 0.05,
+    "POPULATION" : 200,
+    "INFECTED_P": 0.5,
+    "RECOVERED_P" : 0.1,
     "DEATH_P" : 0.1,
-    "DEAD_TIME" : 50
+    "DEAD_DAY" : 10,
+    "TIME_IN_DAY" : 5
 }
 
 
@@ -33,8 +34,8 @@ class Person:
         self.maxVel = 1
         self.infected_time = 0
         self.recovered_p = CONFIG["RECOVERED_P"]
-        self.death_p = CONFIG["DEATH_P"]
-        self.dead_time = CONFIG["DEAD_TIME"]
+        self.death_p = CONFIG["DEATH_P"]/10
+        self.dead_time = CONFIG["DEAD_DAY"]*CONFIG["TIME_IN_DAY"]
 
         # position parameters
         self.pos = np.array((np.random.rand(2)-0.5)*2*CONFIG["HEIGHT"])
@@ -76,13 +77,16 @@ class Person:
                 if np.random.rand() < infected_neighbour * self.infected_p:
                     self.set_status("I")
         elif self.status == "Infected":
-            if self.infected_time > self.dead_time:
-                if np.random.rand() < self.death_p:
-                    self.set_status("D")
+            if np.random.rand() < self.recovered_p:
+                self.set_status("R")
             else:
-                if np.random.rand() < self.recovered_p:
-                    self.set_status("R")
-                self.infected_time += dt
+                if self.infected_time > self.dead_time:
+                    if np.random.rand() < self.death_p:
+                        self.set_status("D")
+                    else:
+                        self.infected_time += dt
+                else:
+                    self.infected_time += dt
 
     def update(self):
         dt = CONFIG["DT"]
