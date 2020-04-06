@@ -37,7 +37,7 @@ with plt.style.context("dark_background"):
     fig = plt.figure(figsize=(8,5))
     plt.suptitle("COVID-19 Simulation",**font)
     gs = gridspec.GridSpec(4, 2, width_ratios=[3, 4],
-                           wspace=0.3, hspace=0.3)
+                           wspace=0.3, hspace=0.5)
     ax1 = plt.subplot(gs[:3,0])
     ax1.set_aspect('equal')
     ax2 = plt.subplot(gs[:2,1])
@@ -62,7 +62,8 @@ i_data = [status_count[1]]
 r_data = [status_count[2]]
 d_data = [status_count[3]]
 stack = ax2.stackplot([],[],[],[])
-capacity_line = ax2.hlines(y=CONFIG["CAPACITY"], xmin=0, xmax=1000, colors="r", linestyle='--', lw=2)
+capacity_line = ax2.hlines(y=CONFIG["CAPACITY"], xmin=0, xmax=1000, colors="r", linestyle='--', lw=1.5)
+line_label = ax2.text(0,CONFIG["CAPACITY"]*1.1,"  Capacity", fontsize=10,color="r")
 
 # Setup Daily plot
 days = [0]
@@ -91,13 +92,13 @@ def init():
     # init graph
     ax2.set_ylim(0, CONFIG["POPULATION"])
     ax2.set_ylabel("Population",**font)
-    ax2.set_xlabel("Day",**font)
     ax2.tick_params(right=True)
     stack = ax2.stackplot([], [], [], [], [])
 
     # init daily plot
     ax3.set_ylabel("Daily Case",**font)
     ax3.tick_params(right=True)
+    ax3.set_xlabel("Day",**font)
     daily = ax3.bar([], [], color=COLOR_SCHEME["I"])
 
     # init counter
@@ -160,15 +161,7 @@ def animate(frame):
         i_data.append(status_count[1])
         r_data.append(status_count[2])
         d_data.append(status_count[3])
-        stack = ax2.stackplot(times, i_data, s_data, r_data, d_data,
-                              colors=[COLOR_SCHEME["I"], COLOR_SCHEME["S"],
-                                      COLOR_SCHEME["R"], COLOR_SCHEME["D"]])
-        legend_elements = [Patch(facecolor=COLOR_SCHEME["I"], edgecolor="w", label=f'I: {status_count[1]}'),
-                           Patch(facecolor=COLOR_SCHEME["S"], edgecolor="w", label=f'S: {status_count[0]}'),
-                           Patch(facecolor=COLOR_SCHEME["R"], edgecolor="w", label=f'R: {status_count[2]}'),
-                           Patch(facecolor=COLOR_SCHEME["D"], edgecolor="w", label=f'D: {status_count[3]}')]
-        legend = ax2.legend(handles=legend_elements, prop={'size': 6,'weight':"bold"}, loc=2,frameon=False)
-        plt.setp(legend.get_texts(), color='w')
+
         current_time = times[-1]
         if frame != 0:
             ax2.set_xlim(0, current_time)
@@ -185,10 +178,14 @@ def animate(frame):
         i_counter.set_text("{}".format(status_count[1]))
         d_counter.set_text("{}".format(status_count[3]))
 
-        daily = ax3.bar(days, daily_data, color=COLOR_SCHEME["I"])
-        stack = stack+[scat,ripple_S2I,ripple_I2R,ripple_I2D,capacity_line,legend, s_counter,i_counter,r_counter,d_counter,
-                       ax2.xaxis,ax3.xaxis,ax3.yaxis]+daily.patches
-        return stack
+    stack = ax2.stackplot(times, i_data, s_data, r_data, d_data,colors=[COLOR_SCHEME["I"], COLOR_SCHEME["S"],
+                                                                        COLOR_SCHEME["R"], COLOR_SCHEME["D"]])
+    daily = ax3.bar(days, daily_data, color=COLOR_SCHEME["I"])
+    stack = stack+[ax2.xaxis,ax3.xaxis,ax3.yaxis,
+                   scat,ripple_S2I,ripple_I2R,ripple_I2D,capacity_line,line_label,
+                   s_counter,i_counter,r_counter,d_counter]+daily.patches
+    return stack
+
 
 fig.canvas.mpl_connect('button_press_event', onClick)
 ani = animation.FuncAnimation(fig=fig, func=animate, frames=100000000, interval=1, init_func=init, blit=True)
