@@ -62,23 +62,23 @@ i_data = [status_count[1]]
 r_data = [status_count[2]]
 d_data = [status_count[3]]
 stack = ax2.stackplot([],[],[],[])
-capacity_line = ax2.hlines(y=CONFIG["CAPACITY"], xmin=0, xmax=1000, colors="r", linestyle='--', lw=1.5)
-line_label = ax2.text(0,CONFIG["CAPACITY"]*1.1,"  Capacity", fontsize=10,color="r")
+capacity_line = ax2.hlines(y=CONFIG["CAPACITY"], xmin=0, xmax=1000, colors="w", linestyle='--', lw=1.5)
+line_label = ax2.text(0,CONFIG["CAPACITY"]*1.1,"  Capacity", fontsize=10,color="w")
 
 # Setup Daily plot
 days = [0]
-daily_data = [i_data[0]]
-daily = ax3.bar([],[], color=COLOR_SCHEME["I"])
+daily_data = [d_data[0]]
+daily = ax3.bar([],[])
 
 # Setup Counter
 s_counter = ax4.text(0.33, 0.6, "", fontweight="bold", fontsize=16, horizontalalignment='left',color=COLOR_SCHEME["S"])
 i_counter = ax4.text(0.83, 0.6, "", fontweight="bold", fontsize=16, horizontalalignment='left',color=COLOR_SCHEME["I"])
 r_counter = ax4.text(0.33, 0.0, "", fontweight="bold", fontsize=16, horizontalalignment='left',color=COLOR_SCHEME["R"])
-d_counter = ax4.text(0.83, 0.0, "", fontweight="bold", fontsize=16, horizontalalignment='left',color='grey')
+d_counter = ax4.text(0.83, 0.0, "", fontweight="bold", fontsize=16, horizontalalignment='left',color=COLOR_SCHEME["D"])
 s_label = ax4.text(0.3, 0.6, "Susceptible", fontsize=8, horizontalalignment='right',color=COLOR_SCHEME["S"])
 i_label = ax4.text(0.8, 0.6, "Infected", fontsize=8, horizontalalignment='right',color=COLOR_SCHEME["I"])
 r_label = ax4.text(0.3, 0.0, "Recovered", fontsize=8, horizontalalignment='right',color=COLOR_SCHEME["R"])
-d_label = ax4.text(0.8, 0.0, "Dead", fontsize=8, horizontalalignment='right',color="grey")
+d_label = ax4.text(0.8, 0.0, "Dead", fontsize=8, horizontalalignment='right',color=COLOR_SCHEME["D"])
 
 def init():
     # init community
@@ -96,10 +96,10 @@ def init():
     stack = ax2.stackplot([], [], [], [], [])
 
     # init daily plot
-    ax3.set_ylabel("Daily Case",**font)
+    ax3.set_ylabel("Daily Deaths",**font)
     ax3.tick_params(right=True)
     ax3.set_xlabel("Day",**font)
-    daily = ax3.bar([], [], color=COLOR_SCHEME["I"])
+    daily = ax3.bar([], [])
 
     # init counter
     ax4.tick_params(left=False, bottom=False,labelleft=False, labelbottom=False)
@@ -118,6 +118,9 @@ def onClick(event):
     pause ^= True
 
 def animate(frame):
+    # if frame == 1:
+    #     global pause
+    #     pause = True
     if not pause:
         # Update community
         poss, colors, status, status_count, ripples_data = community.update()
@@ -170,7 +173,7 @@ def animate(frame):
         # update daily plot
         if int(current_time) - current_time == 0.0:
             days.append(current_time)
-            daily_data.append(d_data[-int(CONFIG["TIME_IN_DAY"] / CONFIG["DT"]) - 1] - d_data[-1])
+            daily_data.append(d_data[-1] - d_data[-int(CONFIG["TIME_IN_DAY"] / CONFIG["DT"]) - 1])
 
         # Update counter
         s_counter.set_text("{}".format(status_count[0]))
@@ -180,10 +183,10 @@ def animate(frame):
 
     stack = ax2.stackplot(times, i_data, s_data, r_data, d_data,colors=[COLOR_SCHEME["I"], COLOR_SCHEME["S"],
                                                                         COLOR_SCHEME["R"], COLOR_SCHEME["D"]])
-    daily = ax3.bar(days, daily_data, color=COLOR_SCHEME["I"])
-    stack = stack+[ax2.xaxis,ax3.xaxis,ax3.yaxis,
-                   scat,ripple_S2I,ripple_I2R,ripple_I2D,capacity_line,line_label,
-                   s_counter,i_counter,r_counter,d_counter]+daily.patches
+    daily = ax3.bar(days, daily_data, color=COLOR_SCHEME["D"])
+    stack = [ax2.xaxis,ax3.xaxis,ax3.yaxis,
+             scat,ripple_S2I,ripple_I2R,ripple_I2D,capacity_line,line_label,
+             s_counter,i_counter,r_counter,d_counter] + daily.patches + stack
     return stack
 
 

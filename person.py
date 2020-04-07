@@ -5,14 +5,14 @@ CONFIG = {
     "DT" : 1,
     "SOCIAL_RADIUS" : 4.5,
     "INFECT_RADIUS" : 3.,
-    "SOCIAL_DISTANCING_FACTOR" : 1, # 0 or 1
+    "SOCIAL_DISTANCING_FACTOR" : 0, # 0 or 1
     "POPULATION" : 200,
     "INFECTED_P": 0.5,
     "RECOVERED_P" : 0.005,
     "DEATH_P" : 0.002,
     "DEAD_DAY" : 3,
     "TIME_IN_DAY" : 10,
-    "CAPACITY" : 100,
+    "CAPACITY" : 75,
     "RIPPLE_DURATION" : 10
 }
 
@@ -22,7 +22,7 @@ COLOR_SCHEME = {
     "S" : "#0099E5",
     "I" : "#FF4C4C",
     "R" : "#34BF49",
-    "D" : "#333333"
+    "D" : "grey"
 }
 
 class Person:
@@ -174,7 +174,7 @@ class Community:
         for i, pos, person in zip(index, positions, people):
             distances = np.linalg.norm(positions - person.pos, axis=1)
             if status_count[1] >= self.capacity:
-                person.death_p = CONFIG["DEATH_P"]*4
+                person.death_p = CONFIG["DEATH_P"]*6
             else:
                 person.death_p = CONFIG["DEATH_P"]
             social_neighbours_index = np.where(np.logical_and(distances < person.social_radius, index != i))[0]
