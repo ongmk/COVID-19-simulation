@@ -46,7 +46,6 @@ with plt.style.context("dark_background"):
 
     ax2.xaxis.set_animated(True)
     ax3.xaxis.set_animated(True)
-    ax3.yaxis.set_animated(True)
 
 # Setup Community
 community = Community()
@@ -99,6 +98,7 @@ def init():
     ax3.set_ylabel("Daily Deaths",**font)
     ax3.tick_params(right=True)
     ax3.set_xlabel("Day",**font)
+    ax3.set_ylim(0, CONFIG["POPULATION"]*0.075)
     daily = ax3.bar([], [])
 
     # init counter
