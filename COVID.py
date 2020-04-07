@@ -31,7 +31,7 @@ def _blit_draw(self, artists, bg_cache):
 
 
 # MONKEY PATCH!!
-animation.Animation._blit_draw = _blit_draw
+# animation.Animation._blit_draw = _blit_draw
 
 with plt.style.context("dark_background"):
     fig = plt.figure(figsize=(8,5))
@@ -131,7 +131,7 @@ def animate(frame):
         #S2I
         if ripples_data[0].shape[0] > 0:
             ripple_S2I.set_offsets(ripples_data[0][:,:2])
-            ripple_S2I.set_sizes(ripples_data[0][:, 2]*20)
+            ripple_S2I.set_sizes(ripples_data[0][:, 2]*CONFIG["RIPPLE_SIZE"])
             alphas = 1-ripples_data[0][:, 2]/CONFIG["RIPPLE_DURATION"]
             rgb = Colors.to_rgb(COLOR_SCHEME["I"])
             ripple_colors = np.concatenate((np.repeat(np.array([rgb]),alphas.shape[0],axis = 0),np.vstack(alphas)),axis = 1)
@@ -181,9 +181,31 @@ def animate(frame):
         i_counter.set_text("{}".format(status_count[1]))
         d_counter.set_text("{}".format(status_count[3]))
 
-    stack = ax2.stackplot(times, i_data, s_data, r_data, d_data,colors=[COLOR_SCHEME["I"], COLOR_SCHEME["S"],
+    # resample
+    times_s = np.array(times)
+    i_data_s = np.array(i_data)
+    s_data_s = np.array(s_data)
+    r_data_s = np.array(r_data)
+    d_data_s = np.array(d_data)
+    print(times_s.shape[0])
+    if times_s.shape[0] > CONFIG["RESAMPLE_SIZE"]:
+        samples_index = np.mod(np.arange(times_s.shape[0]),int(times_s.shape[0]/CONFIG["RESAMPLE_SIZE"])) == 0
+        times_s = times_s[samples_index]
+        i_data_s = i_data_s[samples_index]
+        s_data_s = s_data_s[samples_index]
+        r_data_s = r_data_s[samples_index]
+        d_data_s = d_data_s[samples_index]
+        print("resampled")
+
+    stack = ax2.stackplot(times_s, i_data_s, s_data_s, r_data_s, d_data_s,colors=[COLOR_SCHEME["I"], COLOR_SCHEME["S"],
                                                                         COLOR_SCHEME["R"], COLOR_SCHEME["D"]])
-    daily = ax3.bar(days, daily_data, color=COLOR_SCHEME["D"])
+
+    #filter non zero values
+    daily_data_s = np.array(daily_data)
+    non_zero_index = daily_data_s != 0
+    daily_data_s = daily_data_s[non_zero_index]
+    days_s = np.array(days)[non_zero_index]
+    daily = ax3.bar(days_s, daily_data_s, color=COLOR_SCHEME["D"])
     stack = [ax2.xaxis,ax3.xaxis,ax3.yaxis,
              scat,ripple_S2I,ripple_I2R,ripple_I2D,capacity_line,line_label,
              s_counter,i_counter,r_counter,d_counter] + daily.patches + stack

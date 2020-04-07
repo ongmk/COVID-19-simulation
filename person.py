@@ -13,7 +13,9 @@ CONFIG = {
     "DEAD_DAY" : 3,
     "TIME_IN_DAY" : 10,
     "CAPACITY" : 75,
-    "RIPPLE_DURATION" : 10
+    "RIPPLE_DURATION" : 10,
+    "RIPPLE_SIZE" : 30,
+    "RESAMPLE_SIZE":200
 }
 
 
