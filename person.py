@@ -3,13 +3,13 @@ import numpy as np
 CONFIG = {
     # Parameters
     "SOCIAL_DISTANCING_FACTOR" : 0, # 0 or 1
-    "POPULATION" : 1000,
-    "INFECTED_P": 0.5,
-    "RECOVERED_P" : 0.005,
-    "DEATH_P" : 0.002,
-    "CAPACITY" : 300,
-    "SOCIAL_RADIUS": 4.5,
-    "INFECT_RADIUS": 3.,
+    "POPULATION" : 500,
+    "INFECTED_P": 0.8,
+    "RECOVERED_P" : 0.003,
+    "DEATH_P" : 0.001,
+    "CAPACITY" : 80,
+    "SOCIAL_RADIUS": 3.,
+    "INFECT_RADIUS": 1.,
 
 
     # Dev settings
@@ -17,11 +17,11 @@ CONFIG = {
     "RIPPLE_SIZE": 30,
     "RESAMPLE_SIZE": 200,
 
-    "TIME_IN_DAY": 10,
-    "DEAD_DAY": 3,
+    "TIME_IN_DAY": 50, # scales x-axis
+    "DEAD_DAY": 0, # incubation period ish
 
-    "HEIGHT": 50,
-    "DT": 1,
+    "HEIGHT": 100,
+    "DT": 2,
 }
 
 

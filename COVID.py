@@ -85,6 +85,7 @@ def init():
     # init community
     ax1.set_xlim(-CONFIG["HEIGHT"] * 1.1, CONFIG["HEIGHT"] * 1.1)
     ax1.set_ylim(-CONFIG["HEIGHT"] * 1.1, CONFIG["HEIGHT"] * 1.1)
+    ax1.tick_params(left=False,labelleft=False,bottom=False,labelbottom=False)
     scat.set_offsets([])
     ripple_S2I.set_offsets([])
     ripple_I2R.set_offsets([])
@@ -100,7 +101,7 @@ def init():
     ax3.set_ylabel("Daily Deaths",**font)
     ax3.tick_params(right=True)
     ax3.set_xlabel("Day",**font)
-    ax3.set_ylim(0, CONFIG["POPULATION"]*0.1)
+    ax3.set_ylim(0, CONFIG["POPULATION"]*0.07)
     daily = ax3.bar([], [])
 
     # init counter
@@ -120,9 +121,9 @@ def onClick(event):
     pause ^= True
 
 def animate(frame):
-    # if frame == 1:
-    #     global pause
-    #     pause = True
+    if frame == 1:
+        global pause
+        pause = True
     if not pause:
         # Update community
         poss, colors, status, status_count, ripples_data = community.update()
@@ -168,9 +169,8 @@ def animate(frame):
         d_data.append(status_count[3])
 
         current_time = times[-1]
-        if frame != 0:
-            ax2.set_xlim(0, current_time)
-            ax3.set_xlim(0, current_time)
+        ax2.set_xlim(0, current_time)
+        ax3.set_xlim(0, current_time)
 
         # update daily plot
         if int(current_time) - current_time == 0.0:
@@ -182,6 +182,14 @@ def animate(frame):
         r_counter.set_text("{}".format(status_count[2]))
         i_counter.set_text("{}".format(status_count[1]))
         d_counter.set_text("{}".format(status_count[3]))
+        recovered,dead,infected = status_count[2], status_count[3],status_count[1]
+        closed_case = status_count[2]+status_count[3]
+        if closed_case != 0:
+            print(f"Recovered in closed case: {(recovered/closed_case*100):.2f}%")
+            print(f"Death in closed case: {(dead / closed_case * 100):.2f}%")
+            print(f"Death rate: {(dead / (closed_case+infected) * 100):.2f}%")
+            print(f"Infected rate: {((closed_case + infected)/CONFIG['POPULATION'] * 100):.2f}%")
+            print("-----------------")
 
     # resample
     times_s = np.array(times)
@@ -197,7 +205,6 @@ def animate(frame):
         s_data_s = np.mean(s_data_s.reshape(-1, bin_size), axis=1)
         r_data_s = np.mean(r_data_s.reshape(-1, bin_size), axis=1)
         d_data_s = np.mean(d_data_s.reshape(-1, bin_size), axis=1)
-        print("resampled")
 
     stack = ax2.stackplot(times_s, i_data_s, s_data_s, r_data_s, d_data_s,colors=[COLOR_SCHEME["I"], COLOR_SCHEME["S"],
                                                                         COLOR_SCHEME["R"], COLOR_SCHEME["D"]])
