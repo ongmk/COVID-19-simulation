@@ -187,14 +187,14 @@ def animate(frame):
     s_data_s = np.array(s_data)
     r_data_s = np.array(r_data)
     d_data_s = np.array(d_data)
-    print(times_s.shape[0])
-    if times_s.shape[0] > CONFIG["RESAMPLE_SIZE"]:
-        samples_index = np.mod(np.arange(times_s.shape[0]),int(times_s.shape[0]/CONFIG["RESAMPLE_SIZE"])) == 0
+    if times_s.shape[0] > CONFIG["RESAMPLE_SIZE"] and times_s.shape[0]%CONFIG["RESAMPLE_SIZE"]==0:
+        bin_size = int(times_s.shape[0]/CONFIG["RESAMPLE_SIZE"])
+        samples_index = np.mod(np.arange(times_s.shape[0]),bin_size) == 0
         times_s = times_s[samples_index]
-        i_data_s = i_data_s[samples_index]
-        s_data_s = s_data_s[samples_index]
-        r_data_s = r_data_s[samples_index]
-        d_data_s = d_data_s[samples_index]
+        i_data_s = np.mean(i_data_s.reshape(-1, bin_size), axis=1)
+        s_data_s = np.mean(s_data_s.reshape(-1, bin_size), axis=1)
+        r_data_s = np.mean(r_data_s.reshape(-1, bin_size), axis=1)
+        d_data_s = np.mean(d_data_s.reshape(-1, bin_size), axis=1)
         print("resampled")
 
     stack = ax2.stackplot(times_s, i_data_s, s_data_s, r_data_s, d_data_s,colors=[COLOR_SCHEME["I"], COLOR_SCHEME["S"],
