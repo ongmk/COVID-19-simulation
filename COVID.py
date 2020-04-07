@@ -63,6 +63,8 @@ d_data = [status_count[3]]
 stack = ax2.stackplot([],[],[],[])
 capacity_line = ax2.hlines(y=CONFIG["CAPACITY"], xmin=0, xmax=1000, colors="w", linestyle='--', lw=1.5)
 line_label = ax2.text(0,CONFIG["CAPACITY"]*1.1,"  Capacity", fontsize=10,color="w")
+v_line = ax2.vlines(x=0, ymin=0, ymax=10000, colors="w")
+h_line = ax2.hlines(y=CONFIG["POPULATION"], xmin=0, xmax=1000, colors="w")
 
 # Setup Daily plot
 days = [0]
@@ -206,7 +208,7 @@ def animate(frame):
     daily_data_s = daily_data_s[non_zero_index]
     days_s = np.array(days)[non_zero_index]
     daily = ax3.bar(days_s, daily_data_s, color=COLOR_SCHEME["D"])
-    stack = [ax2.xaxis,ax3.xaxis,
+    stack = [ax2.xaxis,ax3.xaxis,v_line,h_line,
              scat,ripple_S2I,ripple_I2R,ripple_I2D,capacity_line,line_label,
              s_counter,i_counter,r_counter,d_counter] + daily.patches + stack
     return stack
