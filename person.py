@@ -1,21 +1,27 @@
 import numpy as np
 
 CONFIG = {
-    "HEIGHT" : 50,
-    "DT" : 1,
-    "SOCIAL_RADIUS" : 4.5,
-    "INFECT_RADIUS" : 3.,
+    # Parameters
     "SOCIAL_DISTANCING_FACTOR" : 0, # 0 or 1
-    "POPULATION" : 200,
+    "POPULATION" : 1000,
     "INFECTED_P": 0.5,
     "RECOVERED_P" : 0.005,
     "DEATH_P" : 0.002,
-    "DEAD_DAY" : 3,
-    "TIME_IN_DAY" : 10,
-    "CAPACITY" : 75,
-    "RIPPLE_DURATION" : 10,
-    "RIPPLE_SIZE" : 30,
-    "RESAMPLE_SIZE":200
+    "CAPACITY" : 300,
+    "SOCIAL_RADIUS": 4.5,
+    "INFECT_RADIUS": 3.,
+
+
+    # Dev settings
+    "RIPPLE_DURATION": 10,
+    "RIPPLE_SIZE": 30,
+    "RESAMPLE_SIZE": 200,
+
+    "TIME_IN_DAY": 10,
+    "DEAD_DAY": 3,
+
+    "HEIGHT": 50,
+    "DT": 1,
 }
 
 

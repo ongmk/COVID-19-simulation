@@ -2,7 +2,6 @@ from person import Community, COLOR_SCHEME, CONFIG
 from matplotlib import pyplot as plt
 from matplotlib import colors as Colors
 from matplotlib import animation, gridspec
-from matplotlib.patches import Patch
 import numpy as np
 
 font = {'fontfamily':'serif','weight':'bold'}
@@ -17,21 +16,21 @@ def _blit_draw(self, artists, bg_cache):
         # so now. This might not always be reliable, but it's an attempt
         # to automate the process.
         if a.axes not in bg_cache:
-            # bg_cache[a.axes] = a.figure.canvas.copy_from_bbox(a.axes.bbox)
+            bg_cache[a.axes] = a.figure.canvas.copy_from_bbox(a.axes.bbox.expanded(1.1,1.5))
             # change here
-            bg_cache[a.axes] = a.figure.canvas.copy_from_bbox(a.axes.figure.bbox)
+            # bg_cache[a.axes] = a.figure.canvas.copy_from_bbox(a.axes.figure.bbox)
         a.axes.draw_artist(a)
         updated_ax.append(a.axes)
 
     # After rendering all the needed artists, blit each axes individually.
     for ax in set(updated_ax):
         # and here
-        # ax.figure.canvas.blit(ax.bbox)
-        ax.figure.canvas.blit(ax.figure.bbox)
+        ax.figure.canvas.blit(ax.bbox.expanded(1.1,1.5))
+        # ax.figure.canvas.blit(ax.figure.bbox)
 
 
 # MONKEY PATCH!!
-# animation.Animation._blit_draw = _blit_draw
+animation.Animation._blit_draw = _blit_draw
 
 with plt.style.context("dark_background"):
     fig = plt.figure(figsize=(8,5))
@@ -41,10 +40,11 @@ with plt.style.context("dark_background"):
     ax1 = plt.subplot(gs[:3,0])
     ax1.set_aspect('equal')
     ax2 = plt.subplot(gs[:2,1])
-    ax3 = plt.subplot(gs[2:,1],sharex = ax2)
+    ax3 = plt.subplot(gs[2:,1])
     ax4 = plt.subplot(gs[3:, 0], frameon=False)
 
     ax2.xaxis.set_animated(True)
+    ax2.xaxis.set_zorder(2)
     ax3.xaxis.set_animated(True)
 
 # Setup Community
@@ -98,7 +98,7 @@ def init():
     ax3.set_ylabel("Daily Deaths",**font)
     ax3.tick_params(right=True)
     ax3.set_xlabel("Day",**font)
-    ax3.set_ylim(0, CONFIG["POPULATION"]*0.075)
+    ax3.set_ylim(0, CONFIG["POPULATION"]*0.1)
     daily = ax3.bar([], [])
 
     # init counter
@@ -206,7 +206,7 @@ def animate(frame):
     daily_data_s = daily_data_s[non_zero_index]
     days_s = np.array(days)[non_zero_index]
     daily = ax3.bar(days_s, daily_data_s, color=COLOR_SCHEME["D"])
-    stack = [ax2.xaxis,ax3.xaxis,ax3.yaxis,
+    stack = [ax2.xaxis,ax3.xaxis,
              scat,ripple_S2I,ripple_I2R,ripple_I2D,capacity_line,line_label,
              s_counter,i_counter,r_counter,d_counter] + daily.patches + stack
     return stack
